@@ -655,6 +655,17 @@ public class MainWindow extends JFrame
 			}
 			}));
 		disastersMenu.add(menuItem);
+		
+		menuItem = new JMenuItem(strings.getString("menu.disasters.BLIZZARD"));
+		setupKeys(menuItem, "menu.disasters.BLIZZARD");
+		menuItem.addActionListener(wrapActionListener(
+			new ActionListener() {
+			public void actionPerformed(ActionEvent ev)
+			{
+				onInvokeDisasterClicked(Disaster.BLIZZARD);
+			}
+			}));
+		disastersMenu.add(menuItem);
 
 		JMenu priorityMenu = new JMenu(strings.getString("menu.speed"));
 		setupKeys(priorityMenu, "menu.speed");
@@ -1541,6 +1552,9 @@ public class MainWindow extends JFrame
 			break;
 		case EARTHQUAKE:
 			getEngine().makeEarthquake();
+			break;
+		case BLIZZARD:
+			getEngine().makeBlizzard();
 			break;
 		default:
 			assert false; //unknown disaster

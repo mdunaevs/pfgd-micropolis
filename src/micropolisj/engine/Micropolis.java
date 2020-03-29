@@ -185,6 +185,10 @@ public class Micropolis
 	int floodCnt; //number of turns the flood will last
 	int floodX;
 	int floodY;
+	
+	int blizzardCnt; // number of turns blizzard lasts
+	int blizzardX;
+	int blizzardY;
 
 	public int cityTime;  //counts "weeks" (actually, 1/48'ths years)
 	int scycle; //same as cityTime, except mod 1024
@@ -473,7 +477,7 @@ public class Micropolis
 		// this method
 		assert (newTile & LOMASK) == newTile;
 
-		if (map[ypos][xpos] != newTile)
+		if (map[ypos][xpos] != newTile)		// Reset the value of tile if it isnt already that value
 		{
 			map[ypos][xpos] = newTile;
 			fireTileChanged(xpos, ypos);
@@ -886,6 +890,10 @@ public class Micropolis
 		if (floodCnt > 0) {
 			floodCnt--;
 		}
+		
+		if (blizzardCnt > 0) {
+			blizzardCnt--;
+		}
 
 		final int [] DisChance = { 480, 240, 60 };
 		if (noDisasters)
@@ -894,7 +902,7 @@ public class Micropolis
 		if (PRNG.nextInt(DisChance[gameLevel]+1) != 0)
 			return;
 
-		switch (PRNG.nextInt(9))
+		switch (PRNG.nextInt(11))
 		{
 		case 0:
 		case 1:
@@ -917,6 +925,10 @@ public class Micropolis
 			if (pollutionAverage > 60) {
 				makeMonster();
 			}
+			break;
+		case 9:
+		case 10:
+			makeBlizzard();
 			break;
 		}
 	}
@@ -1451,6 +1463,7 @@ public class Micropolis
 
 		bb.put("FIRE", new TerrainBehavior(this, TerrainBehavior.B.FIRE));
 		bb.put("FLOOD", new TerrainBehavior(this, TerrainBehavior.B.FLOOD));
+		bb.put("SNOW", new TerrainBehavior(this, TerrainBehavior.B.SNOW));
 		bb.put("RADIOACTIVE", new TerrainBehavior(this, TerrainBehavior.B.RADIOACTIVE));
 		bb.put("ROAD", new TerrainBehavior(this, TerrainBehavior.B.ROAD));
 		bb.put("RAIL", new TerrainBehavior(this, TerrainBehavior.B.RAIL));
@@ -2376,13 +2389,13 @@ public class Micropolis
 		for (int z = 0; z < 300; z++) {
 			int x = PRNG.nextInt(getWidth());
 			int y = PRNG.nextInt(getHeight());
-			int tile = getTile(x, y);
-			if (isRiverEdge(tile))
+			int tile = getTile(x, y);	// Converts x and y coords on canvas to a specific tile 
+			if (isRiverEdge(tile))	// Check if tile is a river edge block
 			{
 				for (int t = 0; t < 4; t++) {
 					int xx = x + DX[t];
 					int yy = y + DY[t];
-					if (testBounds(xx,yy)) {
+					if (testBounds(xx,yy)) { // New tile position in bounds
 						int c = map[yy][xx];
 						if (isFloodable(c)) {
 							setTile(xx, yy, FLOOD);
@@ -2390,6 +2403,36 @@ public class Micropolis
 							sendMessageAt(MicropolisMessage.FLOOD_REPORT, xx, yy);
 							floodX = xx;
 							floodY = yy;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void makeBlizzard()
+	{
+		final int [] DX = { 0, 1, 0, -1 };
+		final int [] DY = { -1, 0, 1, 0 };
+
+		for (int z = 0; z < 300; z++) {
+			int x = PRNG.nextInt(getWidth());
+			int y = PRNG.nextInt(getHeight());
+			int tile = getTile(x, y);	// Converts x and y coords on canvas to a specific tile 
+			if (isRiverEdge(tile))	// Check if tile is a river edge block
+			{
+				for (int t = 0; t < 4; t++) {
+					int xx = x + DX[t];
+					int yy = y + DY[t];
+					if (testBounds(xx,yy)) { // New tile position in bounds
+						int c = map[yy][xx];
+						if (isFloodable(c)) {
+							setTile(xx, yy, SNOW);
+							blizzardCnt = 30;
+							sendMessageAt(MicropolisMessage.BLIZZARD_REPORT, xx, yy);
+							blizzardX = xx;
+							blizzardY = yy;
 							return;
 						}
 					}

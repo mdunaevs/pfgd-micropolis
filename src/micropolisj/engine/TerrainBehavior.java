@@ -27,7 +27,8 @@ class TerrainBehavior extends TileBehavior
 		RADIOACTIVE,
 		ROAD,
 		RAIL,
-		EXPLOSION;
+		EXPLOSION,
+		SNOW;
 	}
 
 	@Override
@@ -51,6 +52,9 @@ class TerrainBehavior extends TileBehavior
 			return;
 		case EXPLOSION:
 			doExplosion();
+			return;
+		case SNOW:
+			doBlizzard();
 			return;
 		default:
 			assert false;
@@ -126,6 +130,43 @@ class TerrainBehavior extends TileBehavior
 								city.killZone(xx, yy, t);
 							}
 							city.setTile(xx, yy, (char)(FLOOD + PRNG.nextInt(3)));
+						}
+					}
+				}
+			}
+		}
+		else {
+			if (PRNG.nextInt(16) == 0) {
+				city.setTile(xpos, ypos, DIRT);
+			}
+		}
+	}
+	
+	/**
+	 * Called when the current tile is a flooding tile.
+	 */
+	void doBlizzard()
+	{
+		final int [] DX = { 0, 1, 0, -1 };
+		final int [] DY = { -1, 0, 1, 0 };
+
+		if (city.blizzardCnt != 0)
+		{
+			for (int z = 0; z < 4; z++)
+			{
+				if (PRNG.nextInt(8) == 0) {
+					int xx = xpos + DX[z];
+					int yy = ypos + DY[z];
+					if (city.testBounds(xx, yy)) {
+						int t = city.getTile(xx, yy);
+						if (isCombustible(t)
+							|| t == DIRT
+							|| (t >= WOODS5 && t < FLOOD)) // may need to fix this
+						{
+							if (isZoneCenter(t)) {
+								city.killZone(xx, yy, t);
+							}
+							city.setTile(xx, yy, (char)(SNOW));
 						}
 					}
 				}
