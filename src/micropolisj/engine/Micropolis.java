@@ -894,15 +894,40 @@ public class Micropolis
 		if (blizzardCnt > 0) {
 			blizzardCnt--;
 		}
+		
 
 		final int [] DisChance = { 480, 240, 60 };
 		if (noDisasters)
 			return;
+		
+		boolean inWinterSeason = checkIfInWinterSeason();
+		boolean inSummerSeason = checkIfInSummerSeason();
+		
+		int blizzardProbability = DisChance[gameLevel];
+		if(inSummerSeason) {
+			//System.out.println("Using summer probability");
+			blizzardProbability = (blizzardProbability * 10) + 1;
+		} else if (inWinterSeason) {
+			//System.out.println("Using winter probability");
+			blizzardProbability = (blizzardProbability / 4) + 1; 
+		}
+		
+		if (PRNG.nextInt(blizzardProbability) == 0) {
+			//System.out.println("Made blizzard with prob: " + Integer.toString(blizzardProbability));
+			makeBlizzard();
+			return;
+		}
+		
 
 		if (PRNG.nextInt(DisChance[gameLevel]+1) != 0)
 			return;
+		
 
-		switch (PRNG.nextInt(11))
+		pickDisaster();
+	}
+	
+	private void pickDisaster() {
+		switch (PRNG.nextInt(9))
 		{
 		case 0:
 		case 1:
@@ -926,11 +951,23 @@ public class Micropolis
 				makeMonster();
 			}
 			break;
-		case 9:
-		case 10:
-			makeBlizzard();
-			break;
 		}
+	}
+	
+	private boolean checkIfInWinterSeason() {
+		// In the weeks of winter (December, January, February)
+		if ((0 <= cityTime && cityTime <= 8) || (44 <= cityTime && cityTime <= 48)) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean checkIfInSummerSeason() {
+		// In the weeks of summer (June, July, August)
+		if (20 <= cityTime && cityTime <= 32) {
+			return true;
+		}
+		return false;
 	}
 
 	private int[][] smoothFirePoliceMap(int[][] omap)

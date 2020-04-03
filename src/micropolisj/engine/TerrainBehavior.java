@@ -166,6 +166,16 @@ class TerrainBehavior extends TileBehavior
 							if (isZoneCenter(t)) {
 								city.killZone(xx, yy, t);
 							}
+							// If we are setting a residential zone block decrease population by 1%
+							if (isResidentialZoneAny(t)) {
+								System.out.println("Infecting residential zone");
+								city.lastCityPop -= (city.lastCityPop / 100);
+							// If we are setting a stadium block, decrease population by 3%
+							} else if(isStadiumTile(t)) {
+								System.out.println("Infecting stadium zone");
+								city.lastCityPop -= (3 * city.lastCityPop / 100);
+							}
+									
 							city.setTile(xx, yy, (char)(SNOW));
 						}
 					}
@@ -177,6 +187,16 @@ class TerrainBehavior extends TileBehavior
 				city.setTile(xpos, ypos, DIRT);
 			}
 		}
+	}
+	
+
+	
+	private boolean isStadiumTile(int t) {
+		// Stadium tile constants
+		if(779 <= t && t <= 805) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
