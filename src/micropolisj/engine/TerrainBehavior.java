@@ -163,20 +163,23 @@ class TerrainBehavior extends TileBehavior
 							|| t == DIRT
 							|| (t >= WOODS5 && t < FLOOD)) // may need to fix this
 						{
-							if (isZoneCenter(t)) {
-								city.killZone(xx, yy, t);
+							System.out.println("(" + Integer.toString(xx) + ", " + Integer.toString(yy) + ") = " + Integer.toString(getPollutionValue(t)));							
+							if((getPollutionValue(t) < 40) && (Tiles.get(t).getPopulation() < (city.lastCityPop / 100))) {
+								if (isZoneCenter(t)) {
+									city.killZone(xx, yy, t);
+								}
+								// If we are setting a residential zone block decrease population by 1%
+								if (isResidentialZoneAny(t)) {
+									//System.out.println("Infecting residential zone");
+									city.lastCityPop -= (city.lastCityPop / 100);
+								// If we are setting a stadium block, decrease population by 3%
+								} else if(isStadiumTile(t)) {
+									//System.out.println("Infecting stadium zone");
+									city.lastCityPop -= (3 * city.lastCityPop / 100);
+								}
+										
+								city.setTile(xx, yy, (char)(SNOW));
 							}
-							// If we are setting a residential zone block decrease population by 1%
-							if (isResidentialZoneAny(t)) {
-								System.out.println("Infecting residential zone");
-								city.lastCityPop -= (city.lastCityPop / 100);
-							// If we are setting a stadium block, decrease population by 3%
-							} else if(isStadiumTile(t)) {
-								System.out.println("Infecting stadium zone");
-								city.lastCityPop -= (3 * city.lastCityPop / 100);
-							}
-									
-							city.setTile(xx, yy, (char)(SNOW));
 						}
 					}
 				}
@@ -189,7 +192,10 @@ class TerrainBehavior extends TileBehavior
 		}
 	}
 	
-
+//	private int getPollutionDensity(int xPos, int yPos) {
+//		System.out.println("(" + Integer.toString(xPos) + ", " + Integer.toString(yPos) + ") = " + Integer.toString(city.pollutionMem[xPos][yPos]));
+//		return city.pollutionMem[xPos][yPos];
+//	}
 	
 	private boolean isStadiumTile(int t) {
 		// Stadium tile constants
